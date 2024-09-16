@@ -1,8 +1,8 @@
 APP=$(shell basename $(shell git remote get-url origin))
 REGISTRYD=sae4xxx
 VERSION=$(shell git describe --tags --abbrev=0)-$(shell git rev-parse --short HEAD)
-TARGETOS=linux
-TARGETARCH=arm64 # arm64 amd64
+TARGETOS ?= $(shell uname | tr '[:upper:]' '[:lower:]')
+TARGETARCH ?= $(shell uname -m | sed -e 's/^armv[0-9].*/arm/' -e 's/^aarch64/arm64/' -e 's/^x86_64/amd64/' -e 's/^i.86/386/')
 
 format:
 	gofmt -s -w ./
@@ -26,3 +26,4 @@ push:
 
 clean:
 	rm -rf kbot
+	#docker rmi 
