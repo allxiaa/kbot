@@ -2,6 +2,9 @@ name: KBOT_CICD
 
 on: push
 
+permissions:
+  contents: write
+
 env:
   TARGETARCH: amd64
 
