@@ -3,12 +3,10 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-
 image:
   repository: allxiaa
-  tag: "meth"
+  tag: "v1.0.1-f2ed8fb"
   arch: amd64
-
 secret:
   name: kbot
   tokenKey: token
