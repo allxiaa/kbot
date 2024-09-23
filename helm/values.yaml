@@ -5,7 +5,7 @@
 replicaCount: 1
 image:
   repository: allxiaa
-  tag: "v1.0.1-f2ed8fb"
+  tag: "v1.0.1-e31d8dc"
   arch: amd64
 secret:
   name: kbot
