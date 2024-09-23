@@ -4,9 +4,13 @@
 
 replicaCount: 1
 image:
-  repository: allxiaa
+  registry: "ghcr.io"
+  repository: allxiaa/kbot
   tag: "v1.0.1-124b4f0"
+  os: linux
   arch: amd64
+  branch: develop
+
 secret:
   name: kbot
   tokenKey: token
