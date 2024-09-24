@@ -2,13 +2,11 @@ name: KBOT_CICD
 
 on:
  push:
-   branches:
+   branches: 
      - develop
 
-permissions:
-  contents: write
-
 env:
+  TARGETOS: linux
   TARGETARCH: amd64
 
 jobs:
@@ -18,37 +16,55 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
+      
+      - name: Extract registry value from values.yaml
+        uses: mikefarah/yq@master
+        with:
+          cmd: |
+            echo "registry=$(yq e '.image.registry' helm/values.yaml)" >> $GITHUB_ENV
+            echo "repository=$(yq e '.image.repository' helm/values.yaml)" >> $GITHUB_ENV
 
       - name: Run test
         run: make test
       
-      - name: Docker Hub login
-        uses: docker/login-action@v2
+      - name: Login to Docker Container Registry
+        if: ${{ vars.registry == 'docker.io' }}
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to GitHub Container Registry 
+        if: ${{ vars.registry == 'ghcr.io' }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build&Push
         env:
           APP: "kbot"
-          REGISTRY: ${{ secrets.DOCKERHUB_USERNAME }}
-        run: make image push TARGETARCH=$TARGETARCH
+#          REGISTRY: ${{ secrets.DOCKERHUB_USERNAME }}
+        run: make image push REGISTRY=${{ env.registry }} REPOSITORY=${{ env.repository }} TARGETARCH=$TARGETARCH TARGETOS=$TARGETOS
   cd:
     name: CD
     needs: ci
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     - run: echo "VERSION=$(git describe --tags --abbrev=0)-$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
     - uses: mikefarah/yq@master
       with:
-        cmd: yq -i '.image.tag=strenv(VERSION) | .image.arch=strenv(TARGETARCH)' helm/values.yaml
+        cmd: yq -i '.image.tag=strenv(VERSION)' helm/values.yaml
     - run: |
         git config user.name github-actions
         git config user.email github-actions@github.com
