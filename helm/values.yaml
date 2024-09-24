@@ -6,7 +6,7 @@ replicaCount: 1
 image:
   registry: "ghcr.io"
   repository: allxiaa/kbot
-  tag: "v1.0.1-6ff1928"
+  tag: "v1.0.1-3957963"
   os: linux
   arch: amd64
   branch: develop
